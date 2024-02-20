@@ -1,0 +1,254 @@
+<html>
+	<head>
+	  <title>MSX VRAM Hex Editor</title>
+		<script src="./wmsx/wmsx.js"></script>
+		<script src="./dsktool.js"></script>
+		<!--<script src="./index.js"></script>-->
+		<script>
+			const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
+			WMSX.ALLOW_URL_PARAMETERS = false
+			WMSX.FAST_BOOT = true
+			WMSX.SCREEN_DEFAULT_SCALE = viewportWidth >= 1000 ? 1.05 : (viewportWidth / 640)
+		</script>
+		<style>
+.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+   background-color: white;
+}
+.adr{
+  color:#6cc;
+}
+.dltbytes{
+  color:#bbb;
+}
+.Chunk{
+  color:#f0a;
+}
+.On{
+  color:#ff0;
+}
+.Off{
+  color:#f60;
+}
+.Prog{
+  color:#f00;
+}
+.Ctl{
+  color:#2ff;
+}
+.Other{
+  color:#f0f;
+}
+.delta{
+  color:#cc0;
+}
+.meta{
+  color:#0f0
+}
+html{
+  width:100%;
+  height:100%;
+}
+body{
+  width:100%;
+  height:100%;
+  background:#234;
+  color:#ddf;
+  margin:0;
+  font-family: monospace, monospace;
+  font-size:16px;
+
+}
+body a{
+  color:#fff;
+}
+h1 {
+  margin:5px 0px 0px 10px;
+  font-family: Arial, sans-serif;
+  font-size:40px;
+  height:65px;
+}
+#base{
+  width:60%;
+  height:fit-content;
+  background:#000;
+  margin:110px auto;
+  padding:8px;
+  display: inline-block;
+  float: left;
+}
+
+#base2{
+  width:34%;
+  height:fit-content;
+  background:#000;
+  margin:110px auto;
+  padding:8px;
+  display: inline-block;
+  float: right;
+}
+
+#text{
+  color:lightsteelblue;
+  width: 100%;;
+  min-height:100px;
+  margin:0;
+  padding:0;
+  white-space: pre-wrap;
+  line-height: 15px;
+  font-size: 14px;
+}
+
+#filelabel{
+  background:#468;
+  border:1px solid #ccf;
+  padding:2px 8px;
+  margin-left:10px;
+}
+#filelabel:hover{
+  background:#ccf;
+  color:#123;
+}
+.param2{
+  display:inline-block;
+  vertical-align:top;
+  width:320px;
+  word-wrap:break-word;
+  overflow-wrap:anywhere;
+}
+#header{
+  top:0;
+  left:0;
+  width:100%;
+  height:100px;
+  background:black;
+  margin-top:-10px;
+}
+input[type='number']{
+    width: 40px;
+} 
+			/* wmsx code uses this ID as the container for the emulator */
+			#wmsx-screen {
+				width: 650px;
+				height: 512px;
+			}
+			#btn-run {
+				display: block;
+				width: 651px;
+				height: 3em;
+				margin-top: 1em;
+			}
+			
+			#divWMSX {
+				float: right;
+			}
+			
+			#divUi {
+				float: left;
+			}
+		</style>
+	</head>
+	<body  style=" background-image: url(http://netnomad.neocities.org/gemconv/sitebg.png);">
+		<div id="header">
+	  <h1 style="margin-top: 10px">MSX VRAM Hex Editor</h1>
+	  <div style="position:absolute;right:10px;top:5px"><a href="https://github.com/TheNetNomad/GFM-MIDI-Converter" target="_blank">Documentation and Source</a></div>
+	  <div style="position:absolute;right:10px;top:45px;text-align:right"> Based on <a href="https://github.com/thiscouldbebetter/HexEditor" target="_blank">thiscouldbebetter's HexEditor</a> <br>and <a href="https://github.com/jannone/webmsx-integration-template" target="_blank">Jannone's webMSX Integration Template</a></div>
+  </div>
+		
+		<div style="background: black;width: 90%;margin: 0 auto">
+		<div id='divWMSX' style='background: black'>
+			<div id="wmsx-screen"></div><br><br>
+			
+			<label for="scrMode">Choose a screen mode:</label>
+			<select name="scrModeDropDown" id="scrMode">
+				<optgroup label="MSX1">
+					<option value="0:WIDTH 40">SCREEN 0:WIDTH 40 - Text 1</option>
+					<option value="1">SCREEN 1 - Graphic 1</option>
+					<option value="2">SCREEN 2 - Graphic 2</option>
+					<option value="3">SCREEN 3 - Multicolor</option>
+				</optgroup>
+				<optgroup label="MSX2">
+					<option value="0:WIDTH80">SCREEN 0:WIDTH 80 - Text 2</option>
+					<option value="4">SCREEN 4 - Graphic 3</option>
+					<option value="5">SCREEN 5 - Graphic 4</option>
+					<option value="6">SCREEN 6 - Graphic 5</option>
+					<option value="7">SCREEN 7 - Graphic 6</option>
+				</optgroup>
+				<optgroup label="MSX2+">
+					<option value="10">SCREEN 10 - Graphic 7 (RGB tracing)</option>
+					<option value="11">SCREEN 11 - Graphic 7 (YJK tracing)</option>
+					<option value="12">SCREEN 12 - Graphic 7 (YJK colors)</option>
+				</optgroup>
+				<optgroup label="Other">
+					<option value="9:WIDTH 40">SCREEN 9:WIDTH 40 - Graphic 4</option>
+					<option value="9:WIDTH 80">SCREEN 9:WIDTH 80 - Graphic 5</option>
+				</optgroup>
+			</select> 
+			
+			<button id="btn-run" onclick="emulatorRun1()">View VRAM Dump</button>
+		</div>
+		<div id="divUi">
+			<div id="divMain" style='background-color: black'></div>
+		</div>
+		</div>
+		<script type="text/javascript" src="StringExtensions.js"></script>
+		<script type="text/javascript" src="Converter.js" charset="UTF-8"></script>
+		<script type="text/javascript" src="Globals.js"></script>
+		<script type="text/javascript" src="Session.js"></script>
+		<script type="text/javascript">
+
+			var session = new Session([]);
+			Globals.Instance.initialize(session);
+
+			function emulatorRun1() {
+				const disk = {
+					name: 'MyDisk',
+					content: buildDisk({
+						'autoexec.bas': "10 SCREEN " + document.getElementById("scrMode").value + "\r\n20 BLOAD\"SCREEN.BIN\",S\r\n30 GOTO 30",
+						'screen.bin' : getVDump() + "",
+					})
+				}
+				const altPower = 0 
+				try {
+					WMSX.room.diskDrive.loadDiskStackFromFiles(0, [disk], altPower)
+				} catch (ex) {
+					console.error(ex)
+					throw new Error('Could not load your files into the emulator')
+				}  
+				WMSX.room.machine.reset()
+			}
+			
+			function getVDump(){
+				var dataAsArrayBuffer = new ArrayBuffer(session.bytes.length + session.headerBytes.length);
+				var dataAsArrayUnsigned = new Uint8Array(dataAsArrayBuffer);
+				var str = ""
+				for (var i = 0; i < session.headerBytes.length; i++){
+					str = str + String.fromCharCode(session.headerBytes[i]);
+					//console.log(i)
+				}
+				
+				//for (var i = session.headerBytes.length; i < session.bytes.length + session.headerBytes.length; i++){
+				for (var i = 0; i < session.bytes.length; i++){
+					str = str + String.fromCharCode(session.bytes[i]);
+				}
+				return str;
+			}	
+			function buildDisk(files) {
+				const dskimage = create_dsk() // disk-basic boot by default
+				const attr = load_dsk(dskimage)
+	
+				for (const filename in files) {
+					const content = files[filename]
+					if (content.length > 0) {
+						const data = content.split('').map(function(c) { return c.charCodeAt(0); })
+						add_single_file(dskimage, attr, filename, data)
+					}
+				}
+	
+				flush_dsk(dskimage, attr)
+				load_dsk(dskimage)
+				return dskimage
+			}
+		</script>
+		</div>
+	</body>
+</html>
