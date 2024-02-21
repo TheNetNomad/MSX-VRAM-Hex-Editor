@@ -36,8 +36,20 @@ function Session(bytes)
 			divHeaderValue.style.color = "magenta";
 			divHeaderValue.style.background = "black";
 			divHeaderValue.maxLength = 14;
-			
+			divHeaderValue.oninput = function(){
+			 
+			  //session.headerBytes = divHeaderValue.value.split
+			  session.headerBytes[0] = parseInt(divHeaderValue.value.substr(0,2),16);
+			  session.headerBytes[1] = parseInt(divHeaderValue.value.substr(2,2),16);
+			  session.headerBytes[2] = parseInt(divHeaderValue.value.substr(4,2),16);
+			  session.headerBytes[3] = parseInt(divHeaderValue.value.substr(6,2),16);
+			  session.headerBytes[4] = parseInt(divHeaderValue.value.substr(8,2),16);
+			  session.headerBytes[5] = parseInt(divHeaderValue.value.substr(10,2),16);
+			  session.headerBytes[6] = parseInt(divHeaderValue.value.substr(12,2),16);
+			  console.log(session.headerBytes);
+			}
 			this.divHeaderValue = divHeaderValue;
+			
 			divHeader.appendChild(divHeaderValue);
 			
 			divSession.appendChild(divHeader);
@@ -45,7 +57,7 @@ function Session(bytes)
 			var divScrollable = d.createElement("div");
 			
 			divScrollable.style.height = '400px';
-			divScrollable.style.width = '600px';
+			divScrollable.style.width = '700px';
 			divScrollable.style.overflow = 'auto';
 			
 			var rowCount = 0xFFF;
@@ -58,6 +70,7 @@ function Session(bytes)
 			textareaOffsets.style.color = "magenta";
 			textareaOffsets.style.background = "black";
 			textareaOffsets.style.border = 0;
+			//textareaOffsets.style.fontFamily = "MSX";
 			textareaOffsets.style.textAlign = "right";
 			textareaOffsets.spellcheck = false;
 			this.textareaOffsets = textareaOffsets;
@@ -71,20 +84,25 @@ function Session(bytes)
 			textareaHexadecimal.style.background = "black";
 			textareaHexadecimal.style.resize = "none";
 			textareaHexadecimal.spellcheck = false;
+			//textareaHexadecimal.style.fontFamily = "MSX";
 			this.textareaHexadecimal = textareaHexadecimal;
 			divScrollable.appendChild(textareaHexadecimal);
 
 			var textareaASCII = d.createElement("textarea");
-			textareaASCII.cols = bytesPerRow + 5; // Not sure why -1 is needed.
-			textareaASCII.rows = rowCount + 1;
+			textareaASCII.cols = bytesPerRow * 2; // Not sure why -1 is needed.
+			textareaASCII.rows = rowCount;
 			textareaASCII.disabled = true;
 			textareaASCII.style.resize = "none";
 			textareaASCII.style.color = "magenta";
 			textareaASCII.style.background = "black";
 			textareaASCII.spellcheck = false;
 			textareaASCII.style.overflow = "hidden";
-			textareaASCII.style.float = "top"
+			textareaASCII.style.position = "relative"
+			textareaASCII.style.top = "-21px";
+			textareaASCII.style.fontFamily = "Monospace"
 			textareaASCII.style.border = 0;
+			textareaASCII.style.float = "top";
+		  textareaASCII.width = "`200%";
 			this.textareaASCII = textareaASCII;
 			divScrollable.appendChild(textareaASCII);
       
@@ -424,6 +442,35 @@ function Session(bytes)
 
 		this.domElementUpdate();
 	}
+	
+	/*Session.prototype.divHeaderValue_Changed = function(event)
+	{
+		var bytesAsStringHexadecimal = event.target.value;
+		//var headerAsStringHexadecimal = this.divHeaderValue.value;
+		//this.bytes = Converter.stringHexadecimalToBytes(headerAsStringHexadecimal) + Converter.stringHexadecimalToBytes(bytesAsStringHexadecimal);
+    this.headerBytes = Converter.stringHexadecimalToBytes(bytesAsStringHexadecimal);
+    
+		if (bytesAsStringHexadecimal.length % 2 == 0)
+		{
+			this.finalNibble = "";
+		}
+		else
+		{
+			this.finalNibble = bytesAsStringHexadecimal.substr
+			(
+				bytesAsStringHexadecimal.length - 1,
+				1
+			);
+
+			var finalNibbleAsInt = parseInt(this.finalNibble, 16);
+			if (isNaN(finalNibbleAsInt) == true)
+			{
+				this.finalNibble = "";
+			}
+		}
+
+		this.domElementUpdate();
+	}*/
 
 	Session.prototype.textareaHexadecimal_KeyUp = function(event)
 	{
